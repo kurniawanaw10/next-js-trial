@@ -26,22 +26,29 @@ const ContactPage = () => {
     },[])
 
     const deleteContact = async (id: number) => {
-        if (confirm("Are you sure you want to delete this contact?")) {
-          const res = await fetch(`/api/contacts`, {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id }), // Kirim ID untuk DELETE
-          });
-    
-          if (res.ok) {
-            setContacts(contacts.filter((contact: contactType) => contact.id !== id));
-          } else {            
-            alert("Failed to delete contact");
-          }
+      if (id !== null) {
+        const res = await fetch(`/api/contacts`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id }), // Send ID for DELETE
+        });
+  
+        if (res.ok) {
+          setContacts(contacts.filter((contact: contactType) => contact.id !== id));
+          closeModal(); // Close modal after successful deletion
+        } else {
+          alert("Failed to delete contact");
         }
-      };
+      }
+    };
+
+    const refreshContacts = async () => {
+      const res = await fetch("/api/contacts");
+      const data = await res.json();
+      setContacts(data.data);
+    };
 
     const updateContact = async (updatedContact: contactType) => {
         const res = await fetch(`/api/contacts`, {
@@ -88,7 +95,7 @@ const ContactPage = () => {
         <div className="max-w-screen-md mx-auto mt-5">
             <div className="flex items-center justify-between gap-1 mb-5">
                 <Search/>
-                <CreateButton/>
+                <CreateButton refreshContacts={refreshContacts}/>
             </div>
             <table className="w-full text-sm text-left text-gray-500">
                 <thead className="text-sm text-gray-700 uppercase bg-gray-50">
